@@ -1,0 +1,200 @@
+﻿@model Test_CRUD.Context.tbl_Student
+@{
+    ViewBag.Title = "ViewStd";
+}
+<style>
+    .modal-content {
+        padding: 20px;
+    }
+    .row-btn a {
+        margin: 10px;
+    }
+    .main-body {
+        margin-top: 50px;
+        margin-bottom: 150px;
+
+    }
+    .thead-dark {
+        background-color: #303030;
+        color: white;
+    }
+    .table {
+        margin-bottom: 30px;
+    }
+
+</style>
+<link href="~/Content/css/sweetalert2.css" rel="stylesheet" />
+<link href="~/Content/css/sweetalert2.min.css" rel="stylesheet" />
+
+
+<div class="main-body">
+    <div class="modal fade" id="BlogModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="form-group" style="display: none">
+                    <label for="name">ID</label>
+                    <input type="text" class="form-control" id="id" aria-describedby="idHelp">
+                </div>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name">
+                </div>
+                <div class="form-group">
+                    <label for="fname">Fname</label>
+                    <input type="text" class="form-control" id="fname">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" id="email" aria-describedby="emailHelp">
+                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                </div>
+                <div class="form-group">
+                    <label for="mobile">Mobile</label>
+                    <input type="text" class="form-control" id="mobile">
+                </div>
+                <div class="form-group">
+                    <label for="desc">Description</label>
+                    <input type="text" class="form-control" id="desc" row="2">
+                </div>
+                <div class="form-group row-btn" style="display: flex">
+                    <a class="btn btn-warning" href="javascript:void(0)" data-dismiss="modal">Close</a>
+                    <a class="btn btn-danger" href="javascript:void(0)" onclick="sendData(this)">Submit</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Fname</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Mobile</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            @{
+                foreach (var item in ViewBag.students)
+                {
+                    <tr>
+                        <td>@item.ID</td>
+                        <td id="name_@item.ID">@item.Name</td>
+                        <td id="fname_@item.ID">@item.Fname</td>
+                        <td id="email_@item.ID">@item.Email</td>
+                        <td id="mobile_@item.ID">@item.Mobile</td>
+                        <td id="desc_@item.ID">@item.Description</td>
+                        <td class="row-btn" style="display: flex">
+                            <a class="btn btn-success" href="javascript:void(0)" onclick="popup(@item.ID)">Edit</a>
+                            <a class="btn btn-danger" href="javascript:void(0)" onclick="deleteData(@item.ID)">Delete</a>
+                        </td>
+                    </tr>
+
+                }
+            }
+        </table>
+    </div>
+    @*<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>*@
+
+    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill"></script>
+    <script src="~/Content/js/sweetalert2.all.min.js"></script>
+    <script src="~/Content/js/sweetalert2.min.js"></script>
+    <script src="~/Content/js/sweetalert2.js"></script>
+    <script src="~/Content/js/sweetalert2.all.js"></script>
+    <script>
+
+        function popup(eID) {
+            $("#id").val(eID);
+            $('#name').val($('#name_' + eID).text());
+            $('#email').val($('#email_' + eID).text());
+            $('#mobile').val($('#mobile_' + eID).text());
+            $('#fname').val($('#fname_' + eID).text());
+            $('#desc').val($('#desc_' + eID).text());
+            $('#BlogModal').modal('show');
+        }
+
+        function sendData(e) {
+            var d = new DataUpdate();
+            d.id = $("#id").val();
+            d.name = $('#name').val();
+            d.email = $('#email').val();
+            d.mobile = $('#mobile').val();
+            d.fname = $('#fname').val();
+            d.desc = $('#desc').val();
+            $.post('/student/UpdateData', { obj: d }, function (data) {
+
+                if (data == "Success") {
+                    $('#BlogModal').modal('hide');
+                    alert(data);
+                    $('#id_' + d.id).text($("#id").val());
+                    $('#name_' + d.id).text($('#name').val());
+                    $('#email_' + d.id).text($('#email').val());
+                    $('#mobile_' + d.id).text($('#mobile').val());
+                    $('#fname_' + d.id).text($('#fname').val());
+                    $('#desc_' + d.id).text($('#desc').val());
+
+                }
+                else {
+                    alert(data);
+                }
+            })
+        }
+
+
+        function deleteData(eid) {
+            var d = new DataUpdate();
+            d.id = eid;
+            d.name = $('#name_' + eid).text();
+            d.email = $('#email_' + eid).text();
+            d.mobile = $('#mobile_' + eid).text();
+            d.fname = $('#fname_' + eid).text();
+            d.desc = $('#desc_' + eid).text();
+
+            $.post('/student/delete', { obj: d }, function (data) {
+                console.log(data);
+                if (data == "Success") {
+                    console.log(data);
+                    Swal.fire({
+                        position: 'center',
+                        type: 'success',
+                        text: 'Status saved successfully!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    setTimeout(function(){
+                        window.location.reload(1);
+                    }, 2200);
+                    
+                }
+                else {
+                    alert(data);
+                }
+                //location.reload();
+            })
+        }
+
+
+        function DataUpdate() {
+            var id;
+            var name;
+            var fname;
+            var email;
+            var mobile;
+            var desc;
+        }
+
+
+
+    </script>
+
+
+
+
+
+
+
+</div>
+
